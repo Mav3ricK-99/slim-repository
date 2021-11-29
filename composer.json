@@ -1,0 +1,13 @@
+{
+    "require": {
+        "monolog/monolog": "1.0.*",
+        "dompdf/dompdf": "^1.0",
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.4",
+        "slim/http": "^1.2",
+        "php-di/php-di": "^6.3",
+        "firebase/php-jwt": "^5.3",
+        "slim/twig-view": "^3.2",
+        "league/csv": "^9.7"
+    }
+}
