@@ -18,7 +18,7 @@ class Encuesta{
 
     public function guardarEncuestaEnDB(){
 
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $valuesEncuesta = "'{$this->__get('codigoPedido')}','{$this->__get('puntajeServicio')}','{$this->__get('comentarioServicio')}'";
@@ -36,7 +36,7 @@ class Encuesta{
     public static function traerEncuestasDeDB($condicion = '')
         {
     
-            $db = new DB('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
             $listadoMesas = $db->selectObject('encuesta', '*', $condicion);
     
             return $listadoMesas;

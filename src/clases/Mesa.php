@@ -18,7 +18,7 @@
 
         public function guardarMesaEnDB(){
 
-            $db = new DB('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
             $stdOut = new stdClass();
             $stdOut2 = new stdClass();
             
@@ -38,7 +38,7 @@
         public static function traerMesaDeDB($condicion = '')
         {
     
-            $db = new DB('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
             $listadoMesas = $db->selectObject('mesa', '*', $condicion);
     
             return $listadoMesas;
@@ -46,7 +46,7 @@
 
         public static function cambiarEstadoMesa($idMesa, $estado){
 
-            $db = DB::getInstance('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
 
             $resultado = $db->updateObject('mesa', "estadoMesa = '{$estado}'", "WHERE id_mesa = '{$idMesa}'");
 
@@ -55,7 +55,7 @@
 
         public static function getEstadoMesaById($idMesa){
 
-            $db = DB::getInstance('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
             $listadoMesas = $db->selectObject('mesa', '*', "WHERE id_mesa = {$idMesa} LIMIT 1");
 
             return $listadoMesas[0]->estadoMesa;
@@ -63,7 +63,7 @@
 
         public static function getCodigoMesaById($idMesa){
 
-            $db = DB::getInstance('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
             $listadoMesas = $db->selectObject('mesa', '*', "WHERE id_mesa = {$idMesa} LIMIT 1");
 
             return $listadoMesas[0]->codigoMesa;

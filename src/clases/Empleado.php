@@ -1,5 +1,4 @@
 <?php
-
 class Empleado{
 
     public int $id_empleado;
@@ -24,7 +23,7 @@ class Empleado{
 
     public function guardarEmpleadoEnDB(){
 
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         $stdOut2 = new stdClass();
         
@@ -45,7 +44,7 @@ class Empleado{
 
     public function suspenderEmpleado(int $id, $suspender = 1)
     {
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $set = "suspendido = {$suspender}";
@@ -78,7 +77,7 @@ class Empleado{
 
     public function eliminarEmpleado(int $id, $eliminar = 1)
     {
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $set = "eliminado = {$eliminar}";
@@ -110,7 +109,7 @@ class Empleado{
 
     public static function traerEmpleadosDeDB($condicion = '')
     {
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $listadoEmpleados = $db->selectObject('empleado', '*', $condicion);
 
         return $listadoEmpleados;
@@ -118,7 +117,7 @@ class Empleado{
 
     public function getIdEmpleado(){
 
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $empleado = Empleado::traerEmpleadosDeDB("WHERE nombre = '{$this->nombre}' AND rol = '{$this->rol}' LIMIT 1")[0];
         
         return $empleado->id_empleado;
@@ -126,7 +125,7 @@ class Empleado{
 
     public static function getCodigoEmpleadoById($id){
 
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $listadoEmpleado = $db->selectObject('empleado', 'codigoEmpleado', "WHERE id_empleado = {$id} LIMIT 1");
         if(empty($listadoEmpleado)){
             return "EMPLEADO INEXISTENTE";
@@ -137,7 +136,7 @@ class Empleado{
 
     public static function getNombreEmpleadoById($id){
 
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $listadoEmpleado = $db->selectObject('empleado', 'nombre', "WHERE id_empleado = {$id} LIMIT 1");
         if(empty($listadoEmpleado)){
             return "EMPLEADO INEXISTENTE";
@@ -192,7 +191,7 @@ class Empleado{
             $mayorTiempoEspera = $tiempoEstimado;
         }
 
-        $setPedido = "estadoPedido = 'en preparacion', tiempoEstimado = '{$mayorTiempoEspera}', tiempoPedidoTomado = '{$ahora}'";
+        $setPedido = "estadoPedido = 'en preparacion', tiempoEstimado = '{$mayorTiempoEspera}', tiempoPedidoTomado = coalesce(tiempoPedidoTomado, '{$ahora}')";
         $resultadoModPedido = Pedido::modificarPedidoEnDB($pedido->id_pedido, $setPedido);
 
         if($resultadoModPedPorEmpleado->executeCode && $resultadoModPedido->executeCode){
@@ -219,7 +218,7 @@ class Empleado{
         $ahora = date("Y-m-d H:i:s");
 
         $tipoComidaBuscado = Comida::getTipoComidaByRol($this->rol);
-        $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido INNER JOIN comida ON pedidoxempleado.id_comida = comida.id_comida WHERE tipo = '{$tipoComidaBuscado}' AND id_empleado = '{$idEmpleado}' AND codigoPedido = '{$nPedido}' AND pedidoxempleado.estadoPedido = 'en preparacion'");
+        $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido INNER JOIN comida ON pedidoxempleado.id_comida = comida.id_comida WHERE comida.tipo = '{$tipoComidaBuscado}' AND id_empleado = '{$idEmpleado}' AND codigoPedido = '{$nPedido}' AND pedidoxempleado.estadoPedido = 'en preparacion'");
         
         //var_dump($pedidos);
         
@@ -303,7 +302,16 @@ class Empleado{
 
         $pedido->codigoMesa = $codigoMesa;
         $pedido->totalPedido = $totalPedido;
-        Logger::escribir("../src/ventas/ventas.txt", json_encode($pedido), false);
+
+        $encuestas = Encuesta::traerEncuestasDeDB("WHERE codigoPedido = '{$nPedido}' LIMIT 1");
+        if(!empty($encuestas)){
+            $encuestas = $encuestas[0];
+        }else{
+            $encuestas = new stdClass();
+        }
+
+        $nuevaVenta = new Venta($pedido, $encuestas);
+        $nuevaVenta->guardarVenta();
 
         return $stdOut;
     }

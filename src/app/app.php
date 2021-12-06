@@ -5,14 +5,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Slim\Routing\RouteCollectorProxy;
-use Firebase\JWT\JWT;
 use Dompdf\Dompdf;
-
-use Slim\Views\Twig;
-use Slim\Views\TwigMiddleware;
-
-use League\Csv\Reader;
-use League\Csv\Writer;
 
 
 require __DIR__ . '/../../vendor/autoload.php';
@@ -26,6 +19,7 @@ require_once('../src/clases/Mesa.php');
 require_once("../src/clases/Logger.php");
 require_once("../src/clases/Encuesta.php");
 require_once('../src/clases/Pedido.php');
+require_once("../src/clases/Venta.php");
 require_once("../src/clases/PedidoPorEmpleado.php");
 
 require_once('ApiController.php');
@@ -89,6 +83,15 @@ $app->group('/empleados', function (RouteCollectorProxy $group) {
         $response = $response->withStatus(200);
 
         $response->getBody()->write(json_encode(Empleado::traerEmpleadosDeDB()));
+        $response->withHeader('Content-type', 'application/json');
+        return $response;
+    })->add(new ValidarRolMiddleware(["socios"]))->add('ApiMiddleware:ValidarJWT');
+
+    $group->get('/{id}', function (Request $request, Response $response, array $args): Response {
+
+        $response = $response->withStatus(200);
+
+        $response->getBody()->write(json_encode(Empleado::traerEmpleadosDeDB("WHERE id_empleado = {$args['id']}")));
         $response->withHeader('Content-type', 'application/json');
         return $response;
     })->add(new ValidarRolMiddleware(["socios"]))->add('ApiMiddleware:ValidarJWT');
@@ -429,7 +432,7 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
         $response->withHeader('Content-type', 'application/json');
         return $response;
     })->add(new ValidacionEmpleadoPuedeIngresar())->add(new ValidarRolMiddleware())->add('ApiMiddleware:ValidarJWT');
-    //listado pendientes (segun rol)
+    //listado pendientes (segun rol) si sos socio te trae todos
 
     $group->get('/servir/{nPedido}', function (Request $request, Response $response, array $args): Response {
 
@@ -499,11 +502,34 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
 
     $group->get('/tardios/', function (Request $request, Response $response, array $args): Response {
 
-        $resultado = PedidoPorEmpleado::getPedidosTardios();
+        $stdOut = new stdClass();
+        $pedidos = PedidoPorEmpleado::getPedidosTardios();
+
+        $stdOut->pedidos = $pedidos;
+        if(empty($pedidos)){
+            $stdOut->mensaje = "No se encontraron pedidos entregados fuera de tiempo";
+        }
 
         $response = $response->withStatus(200);
 
-        $response->getBody()->write(json_encode($resultado));
+        $response->getBody()->write(json_encode($stdOut));
+        $response->withHeader('Content-type', 'application/json');
+        return $response;
+    })->add(new ValidacionEmpleadoPuedeIngresar())->add(new ValidarRolMiddleware(["socios"]))->add('ApiMiddleware:ValidarJWT');
+
+    $group->get('/entiempo/', function (Request $request, Response $response, array $args): Response {
+
+        $stdOut = new stdClass();
+        $pedidos = PedidoPorEmpleado::getPedidosRealizadosEnTiempo();
+
+        $stdOut->pedidos = $pedidos;
+        if(empty($pedidos)){
+            $stdOut->mensaje = "No se encontraron pedidos entregados en tiempo y forma";
+        }
+
+        $response = $response->withStatus(200);
+
+        $response->getBody()->write(json_encode($stdOut));
         $response->withHeader('Content-type', 'application/json');
         return $response;
     })->add(new ValidacionEmpleadoPuedeIngresar())->add(new ValidarRolMiddleware(["socios"]))->add('ApiMiddleware:ValidarJWT');

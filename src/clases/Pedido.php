@@ -69,7 +69,6 @@ class Pedido{
     public static function traerPedidosDeDB($condicion = ''){
 
         $db = new DB('localhost', 'comandatp', 'root');
-        $stdOut = new stdClass();
         
         $listadoPedidos = $db->selectObject('pedido', '*', "INNER JOIN (SELECT id_mesa, codigoMesa, lugarMesa, estadoMesa FROM mesa) AS mesa ON pedido.id_mesa = mesa.id_mesa ". $condicion);
 
@@ -82,7 +81,7 @@ class Pedido{
     }
 
     public static function modificarPedidoEnDB($id, $set){
-            $db = DB::getInstance('localhost', 'comandatp', 'root');
+            $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
     
             $resultado = $db->updateObject('pedido', $set, "WHERE id_pedido = '{$id}'");
     
@@ -122,7 +121,9 @@ class Pedido{
         
         $htmlTabla .= "<th>Pedidos</th>";
         $htmlTabla .= "<th>Lugar mesa</th>";
-        $htmlTabla .= "<th>Codigo mesa</th></tr>";
+        $htmlTabla .= "<th>Codigo mesa</th>";
+
+        $htmlTabla .= "<th>Foto pedido</th></tr>";
 
         foreach($pedidos as $pedido){
 
@@ -136,7 +137,8 @@ class Pedido{
 
             $htmlTabla .= "<td>" .PedidoPorEmpleado::listarPedidosPorEmpleado($pedido->pedidoPorEmpleado) . "</td>";
             $htmlTabla .= "<td>".$pedido->lugarMesa."</td>";
-            $htmlTabla .= "<td>".$pedido->codigoMesa."</td></tr>";
+            $htmlTabla .= "<td>".$pedido->codigoMesa."</td>";
+            $htmlTabla .= "<td><img src='".$pedido->fotoPedido."'></td></tr>";
         }
 
         $htmlTabla .= "</table>";
@@ -145,7 +147,7 @@ class Pedido{
 
     public static function getTiempoEstimadoEnDB($nPedido){
 
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
 
         $pedido = $db->selectObject('pedido', '*', "WHERE codigoPedido = '{$nPedido}' LIMIT 1");
         if(!isset($pedido)){
@@ -224,31 +226,25 @@ class Pedido{
 
     public static function getPedidoConMasGanancia($fechaInicio, $fechaLimite){
 
-        $ventas = fopen("../src/ventas/ventas.txt", "r");
-        $listadoPedidos = array();
-
-        while (!feof($ventas)){
-            $pedido = json_decode(fgets($ventas));
-            array_push($listadoPedidos, $pedido);
-        }
+        $ventas = Venta::tomarVentasJSON();
 
         $maximoGanancia = 0;
         $posicionPedidoConMasGanancia = 0;
         $i = 0;
-        foreach($listadoPedidos as $pedido){
+        foreach($ventas as $venta){
             
-            if(isset($pedido->tiempoPedidoFinalizado)){
-                $fechaPedidoFinalizado = $pedido->tiempoPedidoFinalizado;
+            if(isset($venta->pedidoVenta->tiempoPedidoFinalizado)){
+                $fechaPedidoFinalizado = $venta->pedidoVenta->tiempoPedidoFinalizado;
                 $fechaPedido = strtotime($fechaPedidoFinalizado);
-                if($fechaPedido >= strtotime($fechaInicio) && $fechaPedido <= strtotime($fechaLimite) && $maximoGanancia < $pedido->totalPedido){
-                    $maximoGanancia = $pedido->totalPedido;
+                if($fechaPedido >= strtotime($fechaInicio) && $fechaPedido <= strtotime($fechaLimite) && $maximoGanancia < $venta->pedidoVenta->totalPedido){
+                    $maximoGanancia = $venta->pedidoVenta->totalPedido;
                     $posicionPedidoConMasGanancia = $i;
                 }
 
                 $i++;
             }
         }
-        return $listadoPedidos[$posicionPedidoConMasGanancia];
+        return $ventas[$posicionPedidoConMasGanancia];
     }
 
 }

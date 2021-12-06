@@ -22,7 +22,7 @@ class Comida{
 
     public function guardarComidaEnDB(){
 
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $valuesComida = "'{$this->__get('nombreComida')}','{$this->__get('tipo')}','{$this->__get('valor')}'";
@@ -40,7 +40,7 @@ class Comida{
     public static function traerComidaDeDB($condicion = '')
     {
 
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $listadoComidas = $db->selectObject('comida', '*', $condicion);
 
         return $listadoComidas;
@@ -48,7 +48,7 @@ class Comida{
 
     public static function traerPropiedadDeDB($prop, $condicion){
 
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $resultado = $db->selectObject('comida', $prop, $condicion . " LIMIT 1")[0];

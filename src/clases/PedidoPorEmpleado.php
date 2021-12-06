@@ -20,7 +20,7 @@ class PedidoPorEmpleado{
 
     public function guardarPedidoPorEmpleadoEnDB(){
 
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $valuesPedidoPorEmpleado = "'{$this->__get('id_comida')}', '{$this->__get('cantidad')}', '{$this->__get('estadoPedido')}', '{$this->__get('tiempoEstimado')}', last_insert_id()";
@@ -34,7 +34,7 @@ class PedidoPorEmpleado{
 
     public static function traerPedidoPorEmpleadoDeDB($condicion = ''){
 
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         
         $listadoPedidos = $db->selectObject('pedidoxempleado', '*', $condicion);
@@ -45,7 +45,7 @@ class PedidoPorEmpleado{
 
     public static function modificarPedidoPorEmpleadoEnDB($id, $set)
     {
-        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
 
         $resultado = $db->updateObject('pedidoxempleado', $set, "WHERE id_pedidoxEmpleado = '{$id}'");
 
@@ -122,6 +122,26 @@ class PedidoPorEmpleado{
         }
 
         return $pedidosTardios;
+    }
+
+    public static function getPedidosRealizadosEnTiempo(){
+
+        $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("WHERE tiempoPedidoFinalizado != 'NULL'");
+        $pedidosEnTiempo = [];
+
+
+        foreach($pedidos as $pedido){
+
+            $dateinsec=strtotime($pedido->tiempoPedidoTomado);
+            $nuevaFecha=$dateinsec+$pedido->tiempoEstimado;
+
+            if(strtotime($pedido->tiempoPedidoFinalizado) < $nuevaFecha){
+                $pedido->fechaEstimada = date("Y-m-d H:i:s", $nuevaFecha);
+                array_push($pedidosEnTiempo, $pedido);
+            }
+        }
+
+        return $pedidosEnTiempo;
     }
 }
 
