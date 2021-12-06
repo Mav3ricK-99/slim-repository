@@ -234,6 +234,7 @@ class Pedido{
         $stdOut = new stdClass();
         if(empty($ventas)){
             $stdOut->venta = "No se encontraron ventas";
+            return $stdOut;
         }
 
         $maximoGanancia = 0;
