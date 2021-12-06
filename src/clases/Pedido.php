@@ -89,6 +89,15 @@ class Pedido{
             return $resultado;
     }
 
+    public static function getMesasConMasPedidos(){
+
+        $db = new DB('localhost', 'comandatp', 'root');
+        
+        $listadoPedidos = $db->selectObject('pedido', 'COUNT(DISTINCT pedido.id_mesa) as mesaMasUsada', "WHERE pedido.estadoPedido = 'listo para servir'");
+
+        return $listadoPedidos;
+    }
+
     public function guardarImagenPedido($imagen)
     {
         $ext = explode(".", $imagen->getClientFilename());
@@ -210,7 +219,36 @@ class Pedido{
 
         $csv->insertAll($pedidosArray);
 
-        return $csv->toString(); 
+        return $csv; 
+    }
+
+    public static function getPedidoConMasGanancia($fechaInicio, $fechaLimite){
+
+        $ventas = fopen("../src/ventas/ventas.txt", "r");
+        $listadoPedidos = array();
+
+        while (!feof($ventas)){
+            $pedido = json_decode(fgets($ventas));
+            array_push($listadoPedidos, $pedido);
+        }
+
+        $maximoGanancia = 0;
+        $posicionPedidoConMasGanancia = 0;
+        $i = 0;
+        foreach($listadoPedidos as $pedido){
+            
+            if(isset($pedido->tiempoPedidoFinalizado)){
+                $fechaPedidoFinalizado = $pedido->tiempoPedidoFinalizado;
+                $fechaPedido = strtotime($fechaPedidoFinalizado);
+                if($fechaPedido >= strtotime($fechaInicio) && $fechaPedido <= strtotime($fechaLimite) && $maximoGanancia < $pedido->totalPedido){
+                    $maximoGanancia = $pedido->totalPedido;
+                    $posicionPedidoConMasGanancia = $i;
+                }
+
+                $i++;
+            }
+        }
+        return $listadoPedidos[$posicionPedidoConMasGanancia];
     }
 
 }

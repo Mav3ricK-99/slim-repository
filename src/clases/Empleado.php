@@ -43,6 +43,71 @@ class Empleado{
         return $stdOut;
     }
 
+    public function suspenderEmpleado(int $id, $suspender = 1)
+    {
+        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $stdOut = new stdClass();
+        
+        $set = "suspendido = {$suspender}";
+        $resultado = $db->updateObject("empleado", $set, "WHERE id_empleado = '{$id}'");
+
+        if ($resultado->executeCode) {
+            $stdOut->exito = true;
+            if($suspender == 1){
+                $mensajeLog = "suspendido";
+                $stdOut->mensaje = "Empleado suspendido exitosamente";
+            }else{
+                $mensajeLog = "recuperado";
+                $stdOut->mensaje = "Empleado recuperado exitosamente";
+            }
+
+            $codigoEmpleado = Empleado::getCodigoEmpleadoById($id);
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ({$this->rol}) ha {$mensajeLog} al empleado codigo {$codigoEmpleado}");
+
+        } else {
+            $stdOut->exito = false;
+            $stdOut->mensaje = $resultado->exception;
+        }
+        return $stdOut;
+    }
+
+    public function habilitarEmpleado(int $id)
+    {
+        return $this->suspenderEmpleado($id, 0);
+    }
+
+    public function eliminarEmpleado(int $id, $eliminar = 1)
+    {
+        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $stdOut = new stdClass();
+        
+        $set = "eliminado = {$eliminar}";
+        $resultado = $db->updateObject("empleado", $set, "WHERE id_empleado = '{$id}'");
+
+        if ($resultado->executeCode) {
+            $stdOut->exito = true;
+            if($eliminar == 1){
+                $mensajeLog = "eliminado";
+                $stdOut->mensaje = "Empleado eliminado exitosamente";
+            }else{
+                $mensajeLog = "recuperado";
+                $stdOut->mensaje = "Empleado recuperado exitosamente";
+            }
+
+            $codigoEmpleado = Empleado::getCodigoEmpleadoById($id);
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ha {$mensajeLog} al empleado codigo {$codigoEmpleado}");
+        } else {
+            $stdOut->exito = false;
+            $stdOut->mensaje = $resultado->exception;
+        }
+        return $stdOut;
+    }
+
+    public function recuperarEmpleado(int $id)
+    {
+        return $this->eliminarEmpleado($id, 0);
+    }
+
     public static function traerEmpleadosDeDB($condicion = '')
     {
         $db = new DB('localhost', 'comandatp', 'root');
@@ -59,6 +124,28 @@ class Empleado{
         return $empleado->id_empleado;
     }
 
+    public static function getCodigoEmpleadoById($id){
+
+        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $listadoEmpleado = $db->selectObject('empleado', 'codigoEmpleado', "WHERE id_empleado = {$id} LIMIT 1");
+        if(empty($listadoEmpleado)){
+            return "EMPLEADO INEXISTENTE";
+        }
+
+        return $listadoEmpleado[0]->codigoEmpleado;
+    }
+
+    public static function getNombreEmpleadoById($id){
+
+        $db = DB::getInstance('localhost', 'comandatp', 'root');
+        $listadoEmpleado = $db->selectObject('empleado', 'nombre', "WHERE id_empleado = {$id} LIMIT 1");
+        if(empty($listadoEmpleado)){
+            return "EMPLEADO INEXISTENTE";
+        }
+
+        return $listadoEmpleado[0]->nombre;
+    }
+
     public function realizarPedido(Pedido $pedido, $foto = null){
 
         $stdOut = new stdClass();
@@ -71,6 +158,8 @@ class Empleado{
             $stdOut = $pedido->guardarPedidoEnDB();
             
             if($stdOut->exito){
+                $codigoMesa = Mesa::getCodigoMesaById($pedido->idMesa);
+                Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ({$this->rol}) ha realizado el pedido de " . json_encode($pedido->pedidoPorEmpleado) . " en la mesa codigo: {$codigoMesa}");
                 Mesa::cambiarEstadoMesa($pedido->idMesa, "con cliente esperando pedido");
             }
         }
@@ -83,6 +172,8 @@ class Empleado{
         $idEmpleado = $this->getIdEmpleado();
         $stdOut = new stdClass();
 
+        $ahora = date("Y-m-d H:i:s");
+
         $tipoComidaBuscado = Comida::getTipoComidaByRol($this->rol);
         $pedido = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido INNER JOIN comida ON pedidoxempleado.id_comida = comida.id_comida WHERE tipo = '{$tipoComidaBuscado}' AND codigoPedido = '{$nPedido}' AND pedidoxempleado.estadoPedido = 'aun sin tomar' LIMIT 1");
         
@@ -92,19 +183,27 @@ class Empleado{
         }
 
         $pedido = $pedido[0];
-        //var_dump($pedido);
 
-        $set = "tiempoEstimado = '{$tiempoEstimado}', id_empleado = '{$idEmpleado}', estadoPedido = 'en preparacion'";
+        $set = "tiempoEstimado = '{$tiempoEstimado}', id_empleado = '{$idEmpleado}', estadoPedido = 'en preparacion', tiempoPedidoTomado = '{$ahora}'";
         $resultadoModPedPorEmpleado = PedidoPorEmpleado::modificarPedidoPorEmpleadoEnDB($pedido->id_pedidoxEmpleado, $set);
 
-        $tiempoEstimadoPedido = Pedido::getTiempoEstimadoEnDB($nPedido);
-        $tiempoEstimadoPedido += $tiempoEstimado;
+        $mayorTiempoEspera = PedidoPorEmpleado::getMayorTiempoEspera($nPedido);
+        if($tiempoEstimado > $mayorTiempoEspera){
+            $mayorTiempoEspera = $tiempoEstimado;
+        }
 
-        $setPedido = "estadoPedido = 'en preparacion', tiempoEstimado = '{$tiempoEstimadoPedido}'";
+        $setPedido = "estadoPedido = 'en preparacion', tiempoEstimado = '{$mayorTiempoEspera}', tiempoPedidoTomado = '{$ahora}'";
         $resultadoModPedido = Pedido::modificarPedidoEnDB($pedido->id_pedido, $setPedido);
 
         if($resultadoModPedPorEmpleado->executeCode && $resultadoModPedido->executeCode){
+        
+           $pedidoStdClass = new stdClass();
+           $pedidoStdClass->cantidadComida = $pedido->cantidadComida;
+           $pedidoStdClass->nombreComida = $pedido->nombreComida;
+           $codigoMesa = Mesa::getCodigoMesaById($pedido->id_mesa);
+
            $stdOut->mensaje ="Usted ha tomado el Pedido {$pedido->nombreComida} del Pedido N° {$nPedido}";
+           Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ({$this->rol}) ha tomado el pedido de " . json_encode($pedidoStdClass) . " en la mesa codigo: {$codigoMesa}");
         }else{
            $stdOut->mensaje ="Hubo un problema al tomar el pedido {$pedido->nombreComida}";
         }
@@ -117,6 +216,8 @@ class Empleado{
         $idEmpleado = $this->getIdEmpleado();
         $stdOut = new stdClass();
 
+        $ahora = date("Y-m-d H:i:s");
+
         $tipoComidaBuscado = Comida::getTipoComidaByRol($this->rol);
         $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido INNER JOIN comida ON pedidoxempleado.id_comida = comida.id_comida WHERE tipo = '{$tipoComidaBuscado}' AND id_empleado = '{$idEmpleado}' AND codigoPedido = '{$nPedido}' AND pedidoxempleado.estadoPedido = 'en preparacion'");
         
@@ -128,7 +229,7 @@ class Empleado{
         }
         $pedido = $pedidos[0];
 
-        $set = "tiempoEstimado = '0', estadoPedido = 'listo para servir'";
+        $set = "estadoPedido = 'listo para servir', tiempoPedidoFinalizado = '{$ahora}'";
         $resultadoModPedPorEmpleado = PedidoPorEmpleado::modificarPedidoPorEmpleadoEnDB($pedido->id_pedidoxEmpleado, $set);
 
         $pedidos[0]->estadoPedido = "listo para servir";
@@ -136,12 +237,19 @@ class Empleado{
         
         if($estanTodosListos){
 
-            $setPedido = "estadoPedido = 'listo para servir', tiempoEstimado = '0'";
+            $setPedido = "estadoPedido = 'listo para servir', tiempoPedidoFinalizado = '{$ahora}'";
             $resultadoModPedido = Pedido::modificarPedidoEnDB($pedido->id_pedido, $setPedido);
         }
         
         if($resultadoModPedPorEmpleado->executeCode){
             $stdOut->mensaje ="Usted ha completado el pedido {$pedido->nombreComida} del Pedido N° {$nPedido}";
+            
+            $pedidoStdClass = new stdClass();
+            $pedidoStdClass->cantidadComida = $pedido->cantidadComida;
+            $pedidoStdClass->nombreComida = $pedido->nombreComida;
+            $codigoMesa = Mesa::getCodigoMesaById($pedido->id_mesa);
+
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ({$this->rol}) ha finalizado el pedido de " . json_encode($pedidoStdClass) . " en la mesa codigo: {$codigoMesa}");
         }else{
             $stdOut->mensaje ="Hubo un problema al notificar el completado del pedido {$pedido->nombreComida}";
         }
@@ -165,6 +273,10 @@ class Empleado{
         if($resultadoCambioEstadoMesa->executeCode){
             
             $stdOut->mensaje = "La mesa {$pedido->codigoMesa} con el pedido {$nPedido} ahora se encuentra comiendo";
+        
+            $codigoMesa = Mesa::getCodigoMesaById($pedido->id_mesa);
+
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ({$this->rol}) ha servido el pedido ({$nPedido}) de " . json_encode($pedido) . " en la mesa codigo: {$codigoMesa}");
         }
 
         return $stdOut;
@@ -185,6 +297,43 @@ class Empleado{
         $stdOut->mensaje = "Pedido facturado, total del pedido: {$totalPedido}, nombre comprador: {$pedido->nombreCliente}";
         Mesa::cambiarEstadoMesa($pedido->id_mesa, "con cliente pagando");
         Pedido::modificarPedidoEnDB($pedido->id_pedido, "totalFacturado = {$totalPedido}");
+
+        $codigoMesa = Mesa::getCodigoMesaById($pedido->id_mesa);
+        Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ({$this->rol}) ha cobrado el pedido ({$nPedido}) de en la mesa codigo: {$codigoMesa} - Valor total de {$totalPedido}");
+
+        $pedido->codigoMesa = $codigoMesa;
+        $pedido->totalPedido = $totalPedido;
+        Logger::escribir("../src/ventas/ventas.txt", json_encode($pedido), false);
+
+        return $stdOut;
+    }
+
+    public function guardarComida(Comida $nuevaComida){
+
+        $stdOut = $nuevaComida->guardarComidaEnDB($nuevaComida);
+        if($stdOut->exito){
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ha guardado una nueva comida ({$nuevaComida->nombreComida}) valor: {$nuevaComida->valor}");
+        }
+
+        return $stdOut;
+    }
+
+    public function agregarMesa(Mesa $mesa){
+
+        $stdOut = $mesa->guardarMesaEnDB($mesa);
+        if($stdOut->executeCode){
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ha agregado una nueva mesa ({$mesa->lugarMesa})");
+        }
+
+        return $stdOut;
+    }
+
+    public function liberarMesa($idMesa){
+
+        $stdOut = Mesa::cambiarEstadoMesa($idMesa, "Libre");
+        if($stdOut->executeCode){
+            Logger::escribir("../src/logs/accionesEmpleado.txt", "{$this->nombre} ha liberado una mesa");
+        }
 
         return $stdOut;
     }

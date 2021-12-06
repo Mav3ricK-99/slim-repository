@@ -29,7 +29,7 @@
             if ($stdOut->executeCode && $stdOut2->executeCode) {
                 $stdOut->mensaje = get_class($this). " agregada con exito.";
             } else {
-                $stdOut->mensaje = "Hubo un error al guardar la ". get_class($nuevaMesa);
+                $stdOut->mensaje = "Hubo un error al guardar la ". get_class($this);
             }
     
             return $stdOut;
@@ -59,6 +59,28 @@
             $listadoMesas = $db->selectObject('mesa', '*', "WHERE id_mesa = {$idMesa} LIMIT 1");
 
             return $listadoMesas[0]->estadoMesa;
+        }
+
+        public static function getCodigoMesaById($idMesa){
+
+            $db = DB::getInstance('localhost', 'comandatp', 'root');
+            $listadoMesas = $db->selectObject('mesa', '*', "WHERE id_mesa = {$idMesa} LIMIT 1");
+
+            return $listadoMesas[0]->codigoMesa;
+        }
+
+        public static function getMesaMasUsada(){
+
+            $resultado = new stdClass();
+            $resultado->mensaje = "Ninguna mesa fue la mas usada";
+
+            $idMesaMasPedidos = Pedido::getMesasConMasPedidos()[0]->mesaMasUsada;
+            if(empty($idMesaMasPedidos)){
+                return $resultado;
+            }else{
+                $resultado->mensaje = "La mesa con mas pedidos fue la del codigo " .Mesa::getCodigoMesaById($idMesaMasPedidos) . " - ID {$idMesaMasPedidos}";
+                return $resultado;
+            }
         }
 
     }

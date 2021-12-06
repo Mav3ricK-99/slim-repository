@@ -1,0 +1,22 @@
+2021-12-04 06:58:23 Federico Gutierrez (socios) ha tomado el pedido de {"cantidadComida":"2","nombreComida":"Cerveza Artesanal"} en la mesa codigo: 
+2021-12-04 06:59:12 Federico Gutierrez (socios) ha tomado el pedido de {"cantidadComida":"2","nombreComida":"Cerveza Artesanal"} en la mesa codigo: 91706
+2021-12-04 07:01:39 Federico Gutierrez (socios) ha tomado el pedido de {"cantidadComida":"2","nombreComida":"Cerveza Artesanal"} en la mesa codigo: 91706
+2021-12-04 07:03:23 Federico Gutierrez (socios) ha servido el pedido (40475) de {"id_pedido":"3","nombreCliente":"Federico","estadoPedido":"listo para servir","tiempoEstimado":"0","totalFacturado":"-1","codigoPedido":"40475","id_mesa":"1","fotoPedido":"","tiempoPedidoTomado":"2021-12-04 06:59:12","tiempoPedidoFinalizado":"2021-12-04 07:01:39","codigoMesa":"91706","lugarMesa":"Patio","estadoMesa":"con cliente esperando pedido","pedidoPorEmpleado":[{"id_pedidoxEmpleado":"3","id_empleado":"1","id_comida":"1","cantidadComida":"2","estadoPedido":"listo para servir","tiempoEstimado":"0","id_pedido":"3","tiempoPedidoTomado":"2021-12-04 06:59:12","tiempoPedidoFinalizado":"2021-12-04 07:01:39","nombreComida":"Cerveza Artesanal","valor":"230"}]} en la mesa codigo: 91706
+2021-12-04 07:05:09 Federico Gutierrez (socios) ha cobrado el pedido (40475) de en la mesa codigo:  - Valor total de 460
+2021-12-04 07:05:52 Federico Gutierrez (socios) ha cobrado el pedido (40475) de en la mesa codigo: 91706 - Valor total de 460
+2021-12-04 07:13:47 EMPLEADO INEXISTENTE ha eliminado al empleado codigo EMPLEADO INEXISTENTE
+2021-12-04 07:17:05  ha eliminado al empleado codigo EMPLEADO INEXISTENTE
+2021-12-04 07:17:33 Federico Gutierrez ha eliminado al empleado codigo EMPLEADO INEXISTENTE
+2021-12-04 07:18:43 Federico Gutierrez ha recuperado al empleado codigo EMPLEADO INEXISTENTE
+2021-12-04 07:19:14 Federico Gutierrez (socios) ha suspendido al empleado codigo 91706
+2021-12-04 07:19:31 Federico Gutierrez (socios) ha recuperado al empleado codigo 91706
+2021-12-04 07:23:16 Federico Gutierrez ha guardado una nueva comida (Algo) valor: 600
+2021-12-04 07:23:43 Federico Gutierrez ha guardado una nueva comida (Algo) valor: 600
+2021-12-04 07:23:51 Federico Gutierrez ha guardado una nueva comida (Algo) valor: 600
+2021-12-04 07:24:18 Federico Gutierrez ha guardado una nueva comida (Algo) valor: 600
+2021-12-04 07:27:37 Federico Gutierrez ha agregado una nueva mesa ()
+2021-12-04 07:28:01 Federico Gutierrez ha agregado una nueva mesa (CandyBar)
+2021-12-04 07:32:19 Federico Gutierrez ha liberado una mesa
+2021-12-04 08:40:45 Federico Gutierrez ha recuperado al empleado codigo EMPLEADO INEXISTENTE
+2021-12-04 08:44:46 Federico Gutierrez (socios) ha cobrado el pedido (40475) de en la mesa codigo: 91706 - Valor total de 460
+2021-12-04 08:46:41 Federico Gutierrez ha agregado una nueva mesa (CandyBar)

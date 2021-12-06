@@ -19,7 +19,7 @@ class DB{
             return;
         }
         try{
-            DB::$conexion = $pass == '' ? new PDO('mysql:host='. $host .';dbname='. $db, $user, $pass) : new PDO('mysql:host='. $host .';dbname='. $db, $user, '');
+            DB::$conexion = $pass != '' ? new PDO('mysql:host='. $host .';dbname='. $db, $user, $pass) : new PDO('mysql:host='. $host .';dbname='. $db, $user, '');
         }catch(PDOException $e){
             echo "Error al conectarse a la Base de datos " . $e->getMessage() . "<br>";
             die();

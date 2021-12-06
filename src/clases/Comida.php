@@ -63,7 +63,7 @@ class Comida{
             case "cerveceros":$tipoComida = "cervesas";break;
             case "cocineros":$tipoComida = "cocina";break;
             case "bartender":$tipoComida = "tragos";break;
-            case "socios":$tipoComida = "cocina";break;
+            case "socios":$tipoComida = "cervesas";break;
         }
 
         return $tipoComida;

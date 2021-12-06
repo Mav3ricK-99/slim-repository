@@ -88,6 +88,41 @@ class PedidoPorEmpleado{
     
         return $pedidos;
     }
+
+    public static function getMayorTiempoEspera($nPedido){
+
+        $listaPedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido WHERE pedido.codigoPedido = '{$nPedido}' AND pedidoxempleado.estadoPedido = 'en preparacion'");
+    
+        $maximoTiempoEspera = 0;
+        foreach($listaPedidos as $pedido){
+
+            if($pedido->tiempoEstimado > $maximoTiempoEspera){
+                $maximoTiempoEspera = $pedido->tiempoEstimado;
+            }
+        }
+
+        return $maximoTiempoEspera;
+    }
+
+    public static function getPedidosTardios(){
+
+        $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("WHERE tiempoPedidoFinalizado != 'NULL'");
+        $pedidosTardios = [];
+
+
+        foreach($pedidos as $pedido){
+
+            $dateinsec=strtotime($pedido->tiempoPedidoTomado);
+            $nuevaFecha=$dateinsec+$pedido->tiempoEstimado;
+
+            if(strtotime($pedido->tiempoPedidoFinalizado) > $nuevaFecha){
+                $pedido->fechaEstimada = date("Y-m-d H:i:s", $nuevaFecha);
+                array_push($pedidosTardios, $pedido);
+            }
+        }
+
+        return $pedidosTardios;
+    }
 }
 
 
