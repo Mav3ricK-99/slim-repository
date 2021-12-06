@@ -90,8 +90,8 @@ class Pedido{
 
     public static function getMesasConMasPedidos(){
 
-        $db = new DB('localhost', 'comandatp', 'root');
-        
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
+    
         $listadoPedidos = $db->selectObject('pedido', 'COUNT(DISTINCT pedido.id_mesa) as mesaMasUsada', "WHERE pedido.estadoPedido = 'listo para servir'");
 
         return $listadoPedidos;
