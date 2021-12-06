@@ -41,7 +41,7 @@ class Pedido{
 
     public function guardarPedidoEnDB(){
 
-        $db = new DB('localhost', 'comandatp', 'root');
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
         $stdOut = new stdClass();
         $stdOut2 = new stdClass();
         
@@ -68,8 +68,8 @@ class Pedido{
 
     public static function traerPedidosDeDB($condicion = ''){
 
-        $db = new DB('localhost', 'comandatp', 'root');
-        
+        $db = DB::getInstance('sql10.freemysqlhosting.net', 'sql10456676', 'sql10456676', 'Pbn5Z9Ayd4');
+    
         $listadoPedidos = $db->selectObject('pedido', '*', "INNER JOIN (SELECT id_mesa, codigoMesa, lugarMesa, estadoMesa FROM mesa) AS mesa ON pedido.id_mesa = mesa.id_mesa ". $condicion);
 
         foreach($listadoPedidos as $pedido){
