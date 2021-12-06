@@ -84,7 +84,7 @@ class PedidoPorEmpleado{
         if($rol != "socios"){
             $condicion = "tipo = '{$tipoComidaBuscado}' AND" ;
         }
-        $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido INNER JOIN comida ON pedidoxempleado.id_comida = comida.id_comida WHERE {$condicion} pedidoxempleado.estadoPedido = 'en preparacion' OR pedidoxempleado.estadoPedido = 'aun sin tomar'");
+        $pedidos = PedidoPorEmpleado::traerPedidoPorEmpleadoDeDB("INNER JOIN pedido ON pedidoxempleado.id_pedido = pedido.id_pedido INNER JOIN comida ON pedidoxempleado.id_comida = comida.id_comida WHERE {$condicion} (pedidoxempleado.estadoPedido = 'en preparacion' OR pedidoxempleado.estadoPedido = 'aun sin tomar')");
     
         return $pedidos;
     }
