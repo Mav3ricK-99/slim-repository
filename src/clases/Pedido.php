@@ -132,9 +132,12 @@ class Pedido{
 
             if($pedido->estadoPedido != "aun sin tomar"){
                 $htmlTabla .= "<td>".$pedido->tiempoEstimado."</td>";
-                $htmlTabla .= "<td>".$pedido->codigoPedido."</td>";
+                
+            }else{
+                $htmlTabla .= "<td></td>";
             }
 
+            $htmlTabla .= "<td>".$pedido->codigoPedido."</td>";
             $htmlTabla .= "<td>" .PedidoPorEmpleado::listarPedidosPorEmpleado($pedido->pedidoPorEmpleado) . "</td>";
             $htmlTabla .= "<td>".$pedido->lugarMesa."</td>";
             $htmlTabla .= "<td>".$pedido->codigoMesa."</td>";
