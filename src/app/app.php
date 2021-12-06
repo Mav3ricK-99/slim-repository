@@ -551,6 +551,7 @@ $app->group('/pedidos', function (RouteCollectorProxy $group) {
     })->add(new ValidacionEmpleadoPuedeIngresar())->add(new ValidarRolMiddleware(["socios"]))->add('ApiMiddleware:ValidarJWT')->add(new ValidacionCamposMiddleware(["fechaInicio", "fechaLimite"]));
 });
 
+//PHP Fatal error:  Uncaught Exception: The PHP GD extension is required, but is not installed. in /app/vendor/dompdf/dompdf/lib/Cpdf.php:5788
 $app->get('/logoComanda', function (Request $request, Response $response, array $args): Response {
 
     $pdf = new Dompdf(array('enable_remote' => true));
@@ -614,7 +615,7 @@ $app->get('/logComanda', function (Request $request, Response $response, array $
             -Estadistica de 30 dias (PUROS SELECTs)
             -Logger en acciones que realizo el usuario
             -Suspendido o eliminado no se puede loguear y ¿se muestra?
-    -DICIEMBRE
+    
     -SUBIR HEROKUUUU
             -GUARDAR VENTAS
     listar con imagens

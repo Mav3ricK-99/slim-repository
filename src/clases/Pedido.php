@@ -231,6 +231,7 @@ class Pedido{
 
         $ventas = Venta::tomarVentasJSON();
 
+        var_dump($ventas);
         $maximoGanancia = 0;
         $posicionPedidoConMasGanancia = 0;
         $i = 0;
