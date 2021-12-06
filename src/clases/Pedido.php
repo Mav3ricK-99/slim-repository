@@ -231,7 +231,11 @@ class Pedido{
 
         $ventas = Venta::tomarVentasJSON();
 
-        var_dump($ventas);
+        $stdOut = new stdClass();
+        if(empty($ventas)){
+            $stdOut->venta = "No se encontraron ventas";
+        }
+
         $maximoGanancia = 0;
         $posicionPedidoConMasGanancia = 0;
         $i = 0;
@@ -248,7 +252,9 @@ class Pedido{
                 $i++;
             }
         }
-        return $ventas[$posicionPedidoConMasGanancia];
+
+        $stdOut->venta = $ventas[$posicionPedidoConMasGanancia];
+        return $stdOut;
     }
 
 }
