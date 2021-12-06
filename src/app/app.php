@@ -292,7 +292,6 @@ $app->group('/encuesta', function (RouteCollectorProxy $group) {
         $nuevaEncuesta = new Encuesta($datosPOST["codigoPedido"], $datosPOST["puntajeServicio"], $datosPOST["comentarioServicio"]);
         $nuevaEncuesta->guardarEncuestaEnDB();
 
-        Logger::escribir("../src/encuesta/encuestas.txt", "El servicio codigo {$datosPOST["codigoPedido"]} ha sido puntado con {$datosPOST["puntajeServicio"]}: {$datosPOST["comentarioServicio"]}");
         $response->getBody()->write(json_encode($encuesta));
         $response = $response->withStatus(200);
         $response->withHeader('Content-type', 'application/json');
